@@ -948,6 +948,138 @@
         </div>
     </section>
 
+
+    <section id="featured-products" class="section-block">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-end section-head gap-3">
+                <div>
+                    <h2 class="section-title mb-1">Sản phẩm nổi bật</h2>
+                    <p class="section-subtitle">Những sản phẩm mới và được quan tâm nhiều tại VitaSport</p>
+                </div>
+
+                <a asp-controller="Product" asp-action="ListPublic" class="btn btn-outline-primary soft-btn px-4">
+                    Xem tất cả
+                </a>
+            </div>
+
+            @if (products.Any())
+            {
+                <div class="featured-slider-wrap">
+                    @if (groupedProducts.Count > 1)
+                    {
+                        <button class="slider-btn prev-btn" type="button" data-bs-target="#featuredProductCarousel" data-bs-slide="prev">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    }
+
+                    <div id="featuredProductCarousel" class="carousel slide" data-bs-ride="false">
+                        <div class="carousel-inner">
+                            @for (int i = 0; i < groupedProducts.Count; i++)
+                            {
+                                var group = groupedProducts[i];
+                                <div class="carousel-item @(i == 0 ? "active" : "")">
+                                    <div class="row g-4">
+                                        @foreach (var item in group)
+                                        {
+                                            <div class="col-12 col-sm-6 col-lg-3">
+                                                <div class="product-card">
+                                                    <div class="product-thumb">
+                                                        @if (item.Quantity == 0)
+                                                        {
+                                                            <span class="out-badge">Hết hàng</span>
+                                                        }
+
+                                                        <span class="product-badge">
+                                                            @(item.Category?.CategoryName ?? "Sản phẩm")
+                                                        </span>
+
+                                                        <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/images/products/no-image.png" : item.ImageUrl)"
+                                                             alt="@item.Name"
+                                                             onerror="this.onerror=null; this.src='/images/products/no-image.png';" />
+
+                                                        <div class="quick-action">
+                                                            @if (item.Quantity > 0)
+                                                            {
+                                                                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                                                                {
+                                                                    <a asp-controller="Cart"
+                                                                       asp-action="AddToCart"
+                                                                       asp-route-id="@item.Id"
+                                                                       class="btn btn-primary w-100 soft-btn">
+                                                                        Thêm vào giỏ
+                                                                    </a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <button type="button"
+                                                                            class="btn btn-primary w-100 soft-btn"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target="#loginRequiredModal">
+                                                                        Thêm vào giỏ
+                                                                    </button>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <button class="btn btn-secondary w-100 soft-btn" disabled>
+                                                                    Hết hàng
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="p-3 p-lg-4">
+                                                        <div class="stock-text mb-2">
+                                                            <i class="fas fa-box me-1"></i>Còn: @item.Quantity sản phẩm
+                                                        </div>
+
+                                                        <h6 class="fw-bold product-name mb-3" title="@item.Name">
+                                                            @item.Name
+                                                        </h6>
+
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div class="price-text">
+                                                                @String.Format(new CultureInfo("vi-VN"), "{0:N0} đ", item.Price)
+                                                            </div>
+
+                                                            <a asp-controller="Product"
+                                                               asp-action="Details"
+                                                               asp-route-id="@item.Id"
+                                                               class="btn btn-light border rounded-circle"
+                                                               title="Xem chi tiết">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @if (groupedProducts.Count > 1)
+                    {
+                        <button class="slider-btn next-btn" type="button" data-bs-target="#featuredProductCarousel" data-bs-slide="next">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-box">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <h5 class="fw-bold">Chưa có sản phẩm nào</h5>
+                    <p class="text-muted mb-0">Hiện tại kho hàng chưa có sản phẩm để hiển thị.</p>
+                </div>
+            }
+        </div>
+    </section>
+
+
     @if (hotCoupons.Any())
     {
         <section class="section-block">
@@ -1183,135 +1315,7 @@
         </section>
     }
 
-    <section id="featured-products" class="section-block">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-end section-head gap-3">
-                <div>
-                    <h2 class="section-title mb-1">Sản phẩm nổi bật</h2>
-                    <p class="section-subtitle">Những sản phẩm mới và được quan tâm nhiều tại VitaSport</p>
-                </div>
-
-                <a asp-controller="Product" asp-action="ListPublic" class="btn btn-outline-primary soft-btn px-4">
-                    Xem tất cả
-                </a>
-            </div>
-
-            @if (products.Any())
-            {
-                <div class="featured-slider-wrap">
-                    @if (groupedProducts.Count > 1)
-                    {
-                        <button class="slider-btn prev-btn" type="button" data-bs-target="#featuredProductCarousel" data-bs-slide="prev">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                    }
-
-                    <div id="featuredProductCarousel" class="carousel slide" data-bs-ride="false">
-                        <div class="carousel-inner">
-                            @for (int i = 0; i < groupedProducts.Count; i++)
-                            {
-                                var group = groupedProducts[i];
-                                <div class="carousel-item @(i == 0 ? "active" : "")">
-                                    <div class="row g-4">
-                                        @foreach (var item in group)
-                                        {
-                                            <div class="col-12 col-sm-6 col-lg-3">
-                                                <div class="product-card">
-                                                    <div class="product-thumb">
-                                                        @if (item.Quantity == 0)
-                                                        {
-                                                            <span class="out-badge">Hết hàng</span>
-                                                        }
-
-                                                        <span class="product-badge">
-                                                            @(item.Category?.CategoryName ?? "Sản phẩm")
-                                                        </span>
-
-                                                        <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/images/products/no-image.png" : item.ImageUrl)"
-                                                             alt="@item.Name"
-                                                             onerror="this.onerror=null; this.src='/images/products/no-image.png';" />
-
-                                                        <div class="quick-action">
-                                                            @if (item.Quantity > 0)
-                                                            {
-                                                                @if (User.Identity != null && User.Identity.IsAuthenticated)
-                                                                {
-                                                                    <a asp-controller="Cart"
-                                                                       asp-action="AddToCart"
-                                                                       asp-route-id="@item.Id"
-                                                                       class="btn btn-primary w-100 soft-btn">
-                                                                        Thêm vào giỏ
-                                                                    </a>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <button type="button"
-                                                                            class="btn btn-primary w-100 soft-btn"
-                                                                            data-bs-toggle="modal"
-                                                                            data-bs-target="#loginRequiredModal">
-                                                                        Thêm vào giỏ
-                                                                    </button>
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                <button class="btn btn-secondary w-100 soft-btn" disabled>
-                                                                    Hết hàng
-                                                                </button>
-                                                            }
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="p-3 p-lg-4">
-                                                        <div class="stock-text mb-2">
-                                                            <i class="fas fa-box me-1"></i>Còn: @item.Quantity sản phẩm
-                                                        </div>
-
-                                                        <h6 class="fw-bold product-name mb-3" title="@item.Name">
-                                                            @item.Name
-                                                        </h6>
-
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <div class="price-text">
-                                                                @String.Format(new CultureInfo("vi-VN"), "{0:N0} đ", item.Price)
-                                                            </div>
-
-                                                            <a asp-controller="Product"
-                                                               asp-action="Details"
-                                                               asp-route-id="@item.Id"
-                                                               class="btn btn-light border rounded-circle"
-                                                               title="Xem chi tiết">
-                                                                <i class="fas fa-eye"></i>
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    @if (groupedProducts.Count > 1)
-                    {
-                        <button class="slider-btn next-btn" type="button" data-bs-target="#featuredProductCarousel" data-bs-slide="next">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="empty-box">
-                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-                    <h5 class="fw-bold">Chưa có sản phẩm nào</h5>
-                    <p class="text-muted mb-0">Hiện tại kho hàng chưa có sản phẩm để hiển thị.</p>
-                </div>
-            }
-        </div>
-    </section>
+    
 
     <section class="section-block">
         <div class="container">
