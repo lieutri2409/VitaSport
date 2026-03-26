@@ -189,13 +189,13 @@ Ctrl + F5
 
 ### 🔁 Quy trình chuẩn:
 
-
+```bash
 git pull
 (sửa code)
 git add .
 git commit -m "message"
 git push
-
+```
 
 ### ⚠️ Lưu ý:
 
