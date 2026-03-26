@@ -1,0 +1,34 @@
+﻿@model Shopping.Models.Product
+
+@{
+    ViewData["Title"] = "Xác nhận xóa";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-danger text-white text-center py-4">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> XÁC NHẬN XÓA SẢN PHẨM</h5>
+            </div>
+            <div class="card-body p-5 text-center">
+                <p class="fs-5 text-dark mb-3">Bạn có chắc chắn muốn xóa vĩnh viễn sản phẩm này khỏi kho hàng không?</p>
+
+                <h3 class="text-danger fw-bold my-4">
+                    "@Model.Name" (Loại: @Model.Category?.CategoryName)
+                </h3>
+
+                <form asp-action="Delete" method="post">
+                    <!-- TRƯỜNG ẨN: ID sản phẩm cần xóa -->
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold shadow">
+                            <i class="fas fa-trash-alt me-2"></i> VÂNG, XÓA NGAY
+                        </button>
+                        <!-- ĐÃ SỬA: Quay về trang Manage -->
+                        <a asp-action="Manage" class="btn btn-outline-secondary py-2">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

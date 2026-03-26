@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Chính sách bảo mật";
+}
+
+<div class="container mt-4">
+    <div class="card shadow border-0 overflow-hidden">
+        <div class="card-header bg-dark text-white py-3">
+            <h4 class="mb-0 fw-bold text-uppercase"><i class="fas fa-user-shield me-2"></i> @ViewData["Title"]</h4>
+        </div>
+        <div class="card-body p-5">
+            <h5 class="fw-bold text-primary mb-3">1. Thu thập thông tin</h5>
+            <p class="text-muted mb-4">Chúng tôi cam kết bảo mật tuyệt đối thông tin khách hàng. Hệ thống Shopping Pro chỉ thu thập các thông tin cần thiết phục vụ cho việc quản lý hàng hóa và danh mục sản phẩm của doanh nghiệp.</p>
+
+            <h5 class="fw-bold text-primary mb-3">2. Sử dụng dữ liệu</h5>
+            <p class="text-muted mb-4">Dữ liệu sản phẩm và loại sản phẩm của bạn được lưu trữ nội bộ và chỉ phục vụ cho mục đích thống kê, báo cáo trong phạm vi hệ thống này.</p>
+
+            <h5 class="fw-bold text-primary mb-3">3. Cam kết bảo mật</h5>
+            <p class="text-muted mb-4">Chúng tôi áp dụng các chuẩn công nghệ ASP.NET Core và SQL Server mới nhất để đảm bảo dữ liệu của bạn không bị rò rỉ hoặc truy cập trái phép từ bên ngoài.</p>
+
+            <div class="alert alert-info border-0 shadow-sm">
+                <i class="fas fa-info-circle me-2"></i> Nếu bạn có bất kỳ câu hỏi nào về chính sách này, vui lòng liên hệ bộ phận hỗ trợ kỹ thuật của hệ thống.
+            </div>
+        </div>
+        <div class="card-footer bg-light text-center py-3">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay về trang chủ</a>
+        </div>
+    </div>
+</div>

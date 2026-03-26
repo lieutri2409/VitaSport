@@ -1,0 +1,193 @@
+﻿@model IEnumerable<Shopping.Models.Address>
+
+@{
+    ViewData["Title"] = "Sổ địa chỉ";
+}
+
+<style>
+    .address-page {
+        padding: 32px 0 48px;
+    }
+
+    .address-header {
+        background: linear-gradient(135deg, #0f172a, #2563eb);
+        color: white;
+        border-radius: 28px;
+        padding: 28px 32px;
+        margin-bottom: 28px;
+        box-shadow: 0 18px 40px rgba(37,99,235,0.18);
+    }
+
+        .address-header h2 {
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+    .address-card,
+    .address-form-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+    }
+
+    .address-card {
+        padding: 22px;
+    }
+
+    .address-form-card {
+        padding: 28px;
+    }
+
+    .badge-default {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .form-control {
+        min-height: 48px;
+        border-radius: 14px;
+    }
+
+    .btn-soft {
+        border-radius: 14px;
+        font-weight: 700;
+    }
+</style>
+
+<div class="container address-page">
+    <div class="address-header">
+        <h2>Sổ địa chỉ</h2>
+        <p class="mb-0">Quản lý địa chỉ giao hàng của bạn.</p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-4">@TempData["Success"]</div>
+    }
+    @if (ViewBag.Errors != null)
+    {
+        <div class="alert alert-danger rounded-4">
+            <ul class="mb-0">
+                @foreach (var err in (List<string>)ViewBag.Errors)
+                {
+                    <li>@err</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="row g-4">
+                @if (!Model.Any())
+                {
+                    <div class="col-12">
+                        <div class="address-card text-center py-5">
+                            <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
+                            <h5 class="fw-bold">Chưa có địa chỉ nào</h5>
+                            <p class="text-muted mb-0">Hãy thêm địa chỉ đầu tiên để đặt hàng nhanh hơn.</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-12">
+                            <div class="address-card">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="fw-bold mb-1">@item.FullName</h5>
+                                        <div class="text-muted">@item.PhoneNumber</div>
+                                    </div>
+
+                                    @if (item.IsDefault)
+                                    {
+                                        <span class="badge-default">
+                                            <i class="fas fa-check-circle"></i>Mặc định
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="text-muted mb-3">@item.FullAddress</div>
+
+                                <div class="d-flex gap-2">
+                                    @if (!item.IsDefault)
+                                    {
+                                        <form asp-action="SetDefault" method="post">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button class="btn btn-outline-primary btn-soft">Đặt mặc định</button>
+                                        </form>
+                                    }
+
+                                    <form asp-action="Delete" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button class="btn btn-outline-danger btn-soft">Xóa</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="address-form-card">
+                <h4 class="fw-bold mb-3">Thêm địa chỉ mới</h4>
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên người nhận</label>
+                        <input name="FullName" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Số điện thoại</label>
+                        <input name="PhoneNumber" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Địa chỉ chi tiết</label>
+                        <input name="StreetAddress" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Phường/Xã</label>
+                        <input name="Ward" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Quận/Huyện</label>
+                        <input name="District" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tỉnh/Thành phố</label>
+                        <input name="City" class="form-control" />
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" name="IsDefault" value="true" id="isDefault" />
+                        <label class="form-check-label" for="isDefault">
+                            Đặt làm địa chỉ mặc định
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-soft w-100">Lưu địa chỉ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

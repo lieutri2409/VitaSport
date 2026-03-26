@@ -1,0 +1,170 @@
+﻿@model IEnumerable<Shopping.Models.OrderDetail>
+
+@{
+    var order = ViewBag.Order as Shopping.Models.Order;
+    var user = ViewBag.User as Shopping.Models.ApplicationUser;
+}
+
+<style>
+    .order-card {
+        border-radius: 16px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border: none;
+    }
+
+    .order-status {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">
+        <i class="fas fa-receipt text-primary me-2"></i>
+        Chi tiết đơn hàng #@order?.Id
+    </h2>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card order-card p-3">
+                <h5 class="mb-3">
+                    <i class="fas fa-box text-primary me-2"></i>
+                    Thông tin đơn hàng
+                </h5>
+
+                <p><b>Mã đơn:</b> #@order?.Id</p>
+                <p><b>Ngày đặt:</b> @order?.OrderDate</p>
+                <p><b>Tổng tiền:</b> @order?.TotalPrice.ToString("N0") ₫</p>
+
+                <p>
+                    <b>Trạng thái:</b>
+
+                    @if (order?.Status == "Pending")
+                    {
+                        <span class="badge bg-warning order-status">Đang chuẩn bị</span>
+                    }
+                    else if (order?.Status == "Shipping")
+                    {
+                        <span class="badge bg-primary order-status">Đang giao</span>
+                    }
+                    else if (order?.Status == "Completed")
+                    {
+                        <span class="badge bg-success order-status">Hoàn thành</span>
+                    }
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card order-card p-3">
+                <h5 class="mb-3">
+                    <i class="fas fa-user text-success me-2"></i>
+                    Thông tin khách hàng
+                </h5>
+
+                <p><b>Tên khách:</b> @user?.FullName</p>
+                <p><b>Email:</b> @user?.Email</p>
+                <p><b>SĐT tài khoản:</b> @(string.IsNullOrEmpty(user?.PhoneNumberCustom) ? "Chưa cập nhật" : user.PhoneNumberCustom)</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card order-card p-3">
+                <h5 class="mb-3">
+                    <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                    Giao hàng
+                </h5>
+
+                <p><b>Người nhận:</b> @(string.IsNullOrEmpty(order?.ReceiverName) ? "Chưa có" : order.ReceiverName)</p>
+                <p><b>SĐT nhận:</b> @(string.IsNullOrEmpty(order?.ReceiverPhone) ? "Chưa có" : order.ReceiverPhone)</p>
+                <p><b>Địa chỉ:</b> @(string.IsNullOrEmpty(order?.ShippingAddress) ? "Chưa có" : order.ShippingAddress)</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card order-card p-3">
+                <h5 class="mb-3">
+                    <i class="fas fa-ticket-alt text-warning me-2"></i>
+                    Thanh toán & giảm giá
+                </h5>
+
+                <p><b>Phương thức:</b> @(string.IsNullOrEmpty(order?.PaymentMethod) ? "COD" : order.PaymentMethod)</p>
+                <p><b>Mã giảm giá:</b> @(string.IsNullOrEmpty(order?.CouponCode) ? "Không dùng" : order.CouponCode)</p>
+                <p><b>Số tiền giảm:</b> @(((order?.DiscountAmount) ?? 0).ToString("N0")) ₫</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card order-card">
+        <div class="card-header bg-dark text-white">
+            <i class="fas fa-list me-2"></i>
+            Danh sách sản phẩm
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">
+                                    @item.Product.Name
+                                </div>
+                            </td>
+
+                            <td>@item.Price.ToString("N0") ₫</td>
+                            <td>@item.Quantity</td>
+                            <td class="fw-bold text-primary">
+                                @((item.Price * item.Quantity).ToString("N0")) ₫
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        @if (User.IsInRole("Admin") || User.IsInRole("NhanVien"))
+        {
+            @if (order?.Status == "Pending")
+            {
+                <a asp-action="UpdateStatus"
+                   asp-route-id="@order.Id"
+                   asp-route-status="Shipping"
+                   class="btn btn-primary">
+                    <i class="fas fa-truck me-2"></i>
+                    Chuyển sang đang giao
+                </a>
+            }
+
+            @if (order?.Status == "Shipping")
+            {
+                <a asp-action="UpdateStatus"
+                   asp-route-id="@order.Id"
+                   asp-route-status="Completed"
+                   class="btn btn-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Giao hàng thành công
+                </a>
+            }
+        }
+    </div>
+
+</div>

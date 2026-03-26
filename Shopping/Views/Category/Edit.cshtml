@@ -1,0 +1,25 @@
+﻿@model Shopping.Models.Category
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow border-0">
+            <div class="card-header bg-info text-white text-center py-3">
+                <h5 class="mb-0 fw-bold">📝 CHỈNH SỬA LOẠI SẢN PHẨM</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    <!-- Quan trọng: Phải giữ ID ẩn để máy biết đang sửa dòng nào -->
+                    <input type="hidden" asp-for="CategoryId" />
+
+                    <div class="form-floating mb-4">
+                        <input asp-for="CategoryName" class="form-control border-2" placeholder="Tên loại" />
+                        <label asp-for="CategoryName">Tên loại sản phẩm</label>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-info text-white fw-bold">CẬP NHẬT</button>
+                        <a asp-action="Index" class="btn btn-light">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

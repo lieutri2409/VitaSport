@@ -1,0 +1,190 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<style>
+    .account-page {
+        padding: 30px 0;
+    }
+
+    .account-shell {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    /* HEADER */
+    .account-header {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+        padding: 25px 30px;
+    }
+
+        .account-header h2 {
+            font-weight: 800;
+        }
+
+    /* LEFT PROFILE */
+    .profile-card {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb, #60a5fa);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        font-weight: bold;
+        margin: auto;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 13px;
+        border: 1px solid transparent;
+    }
+
+    .role-member {
+        background: #eff6ff;
+        color: #2563eb;
+        border-color: #bfdbfe;
+    }
+
+    .role-admin {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+    }
+
+    .role-staff {
+        background: #fefce8;
+        color: #ca8a04;
+        border-color: #fde68a;
+    }
+
+    /* RIGHT FORM */
+    .info-card {
+        padding: 30px;
+    }
+
+    .form-control {
+        height: 50px;
+        border-radius: 12px;
+    }
+
+    .save-btn {
+        height: 50px;
+        border-radius: 12px;
+        font-weight: bold;
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        border: none;
+    }
+</style>
+
+<div class="container account-page">
+    <div class="account-shell">
+
+        <!-- HEADER -->
+        <div class="account-header">
+            <h2>Thông tin tài khoản</h2>
+            <p class="mb-0">Quản lý hồ sơ cá nhân của bạn</p>
+        </div>
+
+        <div class="row g-0">
+
+            <!-- LEFT -->
+            <div class="col-md-4 border-end">
+                <div class="profile-card">
+
+                    @{
+                        var name = Model.Username ?? "User";
+                        var avatar = name.Substring(0, 1).ToUpper();
+                    }
+
+                    <div class="profile-avatar">@avatar</div>
+
+                    <h5 class="mt-3 fw-bold">@Model.Username</h5>
+
+                    <p class="text-muted">
+                        @(string.IsNullOrEmpty(Model.Input.PhoneNumber)
+                                                ? "Chưa có số điện thoại"
+                                                : Model.Input.PhoneNumber)
+                    </p>
+
+                    @{
+                        var roleText = "Thành viên";
+                        var roleIcon = "fas fa-user";
+                        var roleClass = "role-member";
+
+                        if (User.IsInRole("Admin"))
+                        {
+                            roleText = "Quản trị viên";
+                            roleIcon = "fas fa-user-shield";
+                            roleClass = "role-admin";
+                        }
+                        else if (User.IsInRole("NhanVien"))
+                        {
+                            roleText = "Nhân viên";
+                            roleIcon = "fas fa-user-tie";
+                            roleClass = "role-staff";
+                        }
+                    }
+
+                    <span class="role-badge @roleClass">
+                        <i class="@roleIcon me-2"></i>@roleText
+                    </span>
+                </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-md-8">
+                <div class="info-card">
+
+                    <h4 class="fw-bold mb-3">Chỉnh sửa thông tin</h4>
+
+                    <partial name="_StatusMessage" for="StatusMessage" />
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold">Email</label>
+                            <input asp-for="Username" class="form-control" disabled />
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.PhoneNumber" class="fw-bold">Số điện thoại</label>
+                            <input asp-for="Input.PhoneNumber" class="form-control" />
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <button class="btn save-btn w-100 text-white">
+                            <i class="fas fa-save me-2"></i>Lưu thay đổi
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

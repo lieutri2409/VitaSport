@@ -1,0 +1,81 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Shopping.Models.ApplicationUser> SignInManager
+
+<style>
+    .manage-nav-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        padding: 14px;
+        box-shadow: 0 10px 25px rgba(15,23,42,0.05);
+    }
+
+    .manage-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        color: #334155;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.2s ease;
+        margin-bottom: 6px;
+    }
+
+        .manage-nav-link:hover {
+            background: #eff6ff;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .manage-nav-link.active {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white !important;
+            box-shadow: 0 12px 22px rgba(37,99,235,0.18);
+        }
+
+        .manage-nav-link i {
+            width: 18px;
+            text-align: center;
+        }
+</style>
+
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+}
+
+<div class="manage-nav-card">
+    <a class="manage-nav-link @ManageNavPages.IndexNavClass(ViewContext)" asp-page="./Index">
+        <i class="fas fa-user"></i>
+        <span>Hồ sơ</span>
+    </a>
+
+    <a class="manage-nav-link @ManageNavPages.EmailNavClass(ViewContext)" asp-page="./Email">
+        <i class="fas fa-envelope"></i>
+        <span>Email</span>
+    </a>
+
+    <a class="manage-nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" asp-page="./ChangePassword">
+        <i class="fas fa-lock"></i>
+        <span>Mật khẩu</span>
+    </a>
+
+    @if (hasExternalLogins)
+    {
+        <a class="manage-nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">
+            <i class="fas fa-link"></i>
+            <span>Đăng nhập liên kết</span>
+        </a>
+    }
+
+    <a class="manage-nav-link" asp-controller="Address" asp-action="Index">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Sổ địa chỉ</span>
+    </a>
+
+    <a class="manage-nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" asp-page="./PersonalData">
+        <i class="fas fa-database"></i>
+        <span>Dữ liệu cá nhân</span>
+    </a>
+</div>

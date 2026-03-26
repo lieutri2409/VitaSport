@@ -1,0 +1,349 @@
+﻿@model IEnumerable<Shopping.Models.Product>
+@using System.Globalization
+@using System.Linq
+
+@{
+    string currentCategoryName = ViewData["CurrentCategoryName"]?.ToString() ?? "";
+    int? currentCategoryId = ViewData["CurrentCategoryId"] != null ? (int?)ViewData["CurrentCategoryId"] : null;
+    int productCount = ViewData["ProductCount"] != null ? (int)ViewData["ProductCount"] : 0;
+
+    int currentPage = ViewData["CurrentPage"] != null ? (int)ViewData["CurrentPage"] : 1;
+    int totalPages = ViewData["TotalPages"] != null ? (int)ViewData["TotalPages"] : 1;
+
+    string keyword = ViewData["Keyword"]?.ToString() ?? "";
+    string sortBy = ViewData["SortBy"]?.ToString() ?? "";
+    string stockStatus = ViewData["StockStatus"]?.ToString() ?? "";
+
+    decimal? minPrice = ViewData["MinPrice"] as decimal?;
+    decimal? maxPrice = ViewData["MaxPrice"] as decimal?;
+}
+
+<style>
+    .page-hero {
+        background: linear-gradient(135deg, #0f172a, #2563eb);
+        color: white;
+        border-radius: 30px;
+        padding: 35px;
+        margin-bottom: 28px;
+    }
+
+    .filter-bar {
+        background: #fff;
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+        padding: 20px;
+        margin-bottom: 28px;
+    }
+
+    .soft-input,
+    .soft-select,
+    .price-range-input {
+        border-radius: 12px !important;
+        min-height: 44px;
+    }
+
+    .product-card {
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        transition: .3s;
+        height: 100%;
+    }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 35px rgba(0,0,0,0.15);
+        }
+
+    .product-image-wrap {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+    }
+
+        .product-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .top-badge-left,
+    .top-badge-right {
+        position: absolute;
+        top: 12px;
+        z-index: 2;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .top-badge-left {
+        left: 12px;
+    }
+
+    .top-badge-right {
+        right: 12px;
+        background: rgba(255,255,255,.94);
+        color: #2563eb;
+    }
+
+    .stock-badge {
+        background: #ef4444;
+        color: white;
+    }
+
+    .product-body {
+        padding: 16px;
+    }
+
+    .product-name {
+        font-weight: 800;
+        color: #0f172a;
+        min-height: 44px;
+    }
+
+    .product-desc {
+        color: #64748b;
+        font-size: 14px;
+        min-height: 42px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .price-text {
+        color: #ef4444;
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .meta-row {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .product-footer {
+        padding: 0 16px 16px 16px;
+    }
+
+    .rounded-soft {
+        border-radius: 14px;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        border: 2px dashed #cbd5e1;
+        border-radius: 28px;
+        background: rgba(255,255,255,0.75);
+        padding: 70px 20px;
+        text-align: center;
+    }
+
+    .pagination-wrap {
+        margin-top: 40px;
+    }
+
+    .custom-pagination .page-link {
+        border: none;
+        margin: 0 4px;
+        border-radius: 12px;
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #0f172a;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .custom-pagination .active .page-link {
+        background: #2563eb;
+        color: white;
+    }
+
+    .custom-pagination .disabled .page-link {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    .range-label {
+        font-size: 13px;
+        color: #64748b;
+    }
+</style>
+
+<div class="container py-4">
+
+    <div class="page-hero">
+        <h2 class="fw-bold">Sản phẩm hiện có tại VitaSport</h2>
+        @if (!string.IsNullOrEmpty(currentCategoryName))
+        {
+            <p class="mb-1">Danh mục: <strong>@currentCategoryName</strong></p>
+        }
+        <p class="mb-0">Tìm thấy <strong>@productCount</strong> sản phẩm</p>
+    </div>
+
+    <div class="filter-bar">
+        <form id="filterForm">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Từ khóa</label>
+                    <input type="text"
+                           name="keyword"
+                           value="@keyword"
+                           class="form-control soft-input"
+                           placeholder="Tìm tên sản phẩm..." />
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold">Loại sản phẩm</label>
+                    <select name="categoryId" asp-items="ViewBag.PublicCategoryList" class="form-select soft-select"></select>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold">Tình trạng</label>
+                    <select name="stockStatus" class="form-select soft-select">
+                        <option value="">Tất cả</option>
+                        <option value="inStock" selected="@(stockStatus == "inStock")">Còn hàng</option>
+                        <option value="outStock" selected="@(stockStatus == "outStock")">Hết hàng</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold">Sắp xếp</label>
+                    <select name="sortBy" class="form-select soft-select">
+                        <option value="">Mới nhất</option>
+                        <option value="priceAsc" selected="@(sortBy == "priceAsc")">Giá tăng dần</option>
+                        <option value="priceDesc" selected="@(sortBy == "priceDesc")">Giá giảm dần</option>
+                        <option value="nameAsc" selected="@(sortBy == "nameAsc")">Tên A-Z</option>
+                        <option value="nameDesc" selected="@(sortBy == "nameDesc")">Tên Z-A</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-1 col-md-6">
+                    <button type="submit" class="btn btn-primary w-100 rounded-soft">Lọc</button>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <a asp-action="ListPublic" class="btn btn-outline-secondary w-100 rounded-soft">Đặt lại</a>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Giá từ</label>
+                    <input type="number"
+                           name="minPrice"
+                           id="minPrice"
+                           value="@(minPrice?.ToString() ?? "")"
+                           class="form-control price-range-input"
+                           placeholder="VD: 500000" />
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Đến</label>
+                    <input type="number"
+                           name="maxPrice"
+                           id="maxPrice"
+                           value="@(maxPrice?.ToString() ?? "")"
+                           class="form-control price-range-input"
+                           placeholder="VD: 3000000" />
+                </div>
+
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold">Lọc nhanh theo giá</label>
+                    <input type="range"
+                           class="form-range"
+                           id="priceSlider"
+                           min="0"
+                           max="10000000"
+                           step="50000"
+                           value="@(maxPrice ?? 5000000)" />
+                    <div class="range-label">
+                        Giá tối đa đang chọn:
+                        <strong id="priceSliderValue">@String.Format(new CultureInfo("vi-VN"), "{0:N0} đ", maxPrice ?? 5000000)</strong>
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" name="page" value="1" />
+        </form>
+    </div>
+
+    <div id="productListContainer">
+        @await Html.PartialAsync("_ProductListPartial", Model)
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const filterForm = document.getElementById("filterForm");
+        const productListContainer = document.getElementById("productListContainer");
+        const priceSlider = document.getElementById("priceSlider");
+        const maxPriceInput = document.getElementById("maxPrice");
+        const sliderValue = document.getElementById("priceSliderValue");
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+        }
+
+        if (priceSlider && maxPriceInput && sliderValue) {
+            priceSlider.addEventListener("input", function () {
+                maxPriceInput.value = this.value;
+                sliderValue.textContent = formatCurrency(this.value);
+            });
+
+            maxPriceInput.addEventListener("input", function () {
+                if (this.value !== "") {
+                    priceSlider.value = this.value;
+                    sliderValue.textContent = formatCurrency(this.value);
+                }
+            });
+        }
+
+        async function loadProducts(page = 1) {
+            const formData = new FormData(filterForm);
+            formData.set("page", page);
+            formData.set("ajax", "true");
+
+            const params = new URLSearchParams(formData);
+
+            const response = await fetch(`/Product/ListPublic?${params.toString()}`, {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            const html = await response.text();
+            productListContainer.innerHTML = html;
+
+            bindPaginationLinks();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function bindPaginationLinks() {
+            document.querySelectorAll(".ajax-page-link").forEach(link => {
+                link.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const page = this.dataset.page;
+                    if (page) {
+                        loadProducts(page);
+                    }
+                });
+            });
+        }
+
+        filterForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            loadProducts(1);
+        });
+
+        bindPaginationLinks();
+    </script>
+}

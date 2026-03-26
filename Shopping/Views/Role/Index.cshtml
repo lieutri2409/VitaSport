@@ -1,0 +1,78 @@
+﻿@model List<RoleViewModel>
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Quản lý Role</h2>
+
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card text-white bg-primary shadow">
+                <div class="card-body">
+                    <h5>Tổng Role</h5>
+                    <h2>@Model.Count</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-success shadow">
+                <div class="card-body">
+                    <h5>Tổng User</h5>
+                    <h2>@Model.Sum(r => r.UserCount)</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 text-end">
+            <a class="btn btn-primary mt-4" asp-action="Create">
+                + Tạo Role
+            </a>
+        </div>
+
+    </div>
+
+
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+            Danh sách Role
+        </div>
+
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Số User</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var role in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>@role.RoleName</strong>
+                        </td>
+
+                        <td>
+                            <span class="badge bg-info">
+                                @role.UserCount user
+                            </span>
+                        </td>
+
+                        <td>
+                            <a class="btn btn-sm btn-danger"
+                               asp-action="Delete"
+                               asp-route-id="@role.RoleId">
+                                Xóa
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</div>

@@ -1,0 +1,120 @@
+﻿@using System.Globalization
+@{
+    var order = ViewBag.Order as Shopping.Models.Order;
+    var user = ViewBag.User as Shopping.Models.ApplicationUser;
+}
+
+<div class="container mt-5 py-5 text-center">
+
+    <div class="card shadow border-0 rounded-4 p-5">
+
+        <i class="fas fa-check-circle text-success mb-4"
+           style="font-size:80px"></i>
+
+        <h2 class="fw-bold text-success mb-3">
+            Đặt hàng thành công 🎉
+        </h2>
+
+        <p class="text-muted">
+            Cảm ơn bạn đã mua hàng tại
+            <strong>VitaSport</strong>
+        </p>
+
+        <h4 class="mb-4">
+            Mã đơn hàng của bạn:
+            <span class="text-primary">#@order?.Id</span>
+        </h4>
+
+        <hr class="my-4" />
+
+        <div class="row text-start justify-content-center">
+            <div class="col-md-7">
+                <div class="card border-0 bg-light p-4 rounded-4">
+
+                    <h5 class="fw-bold mb-3">
+                        📦 Thông tin đơn hàng
+                    </h5>
+
+                    <p class="mb-2">
+                        <b>👤 Người nhận:</b>
+                        @order?.ReceiverName
+                    </p>
+
+                    <p class="mb-2">
+                        <b>📞 SĐT nhận hàng:</b>
+                        @order?.ReceiverPhone
+                    </p>
+
+                    <p class="mb-2">
+                        <b>📍 Địa chỉ giao hàng:</b>
+                        @order?.ShippingAddress
+                    </p>
+
+                    <p class="mb-2">
+                        <b>📧 Email tài khoản:</b>
+                        @user?.Email
+                    </p>
+
+                    <p class="mb-2">
+                        <b>🎟 Mã giảm giá:</b>
+                        @(string.IsNullOrEmpty(order?.CouponCode) ? "Không dùng" : order.CouponCode)
+                    </p>
+
+                    <p class="mb-2">
+                        <b>💸 Giảm giá:</b>
+                        @(((order?.DiscountAmount) ?? 0).ToString("N0")) đ
+                    </p>
+
+                    <p class="mb-2">
+                        <b>💳 Thanh toán:</b>
+                        @(string.IsNullOrEmpty(order?.PaymentMethod) ? "COD" : order.PaymentMethod)
+                    </p>
+
+                    <p class="mb-2">
+                        <b>📅 Ngày đặt:</b>
+                        @order?.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                    </p>
+
+                    <p class="mb-2">
+                        <b>💰 Tổng tiền:</b>
+                        <span class="text-danger fw-bold">
+                            @String.Format(new CultureInfo("vi-VN"), "{0:N0}đ", order?.TotalPrice)
+                        </span>
+                    </p>
+
+                    <p class="mb-0">
+                        <b>📦 Trạng thái:</b>
+                        <span class="badge bg-warning">
+                            Đang chuẩn bị
+                        </span>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-5 flex-wrap">
+
+            <a asp-controller="Order"
+               asp-action="MyOrder"
+               class="btn btn-success px-5 py-2 rounded-pill shadow">
+                <i class="fas fa-truck me-2"></i>
+                Theo dõi đơn hàng
+            </a>
+
+            <a href="/"
+               class="btn btn-primary px-5 py-2 rounded-pill shadow">
+                Tiếp tục mua sắm
+            </a>
+
+            <a asp-controller="Product"
+               asp-action="ListPublic"
+               class="btn btn-outline-dark px-5 py-2 rounded-pill">
+                Xem sản phẩm
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
