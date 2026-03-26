@@ -10,8 +10,8 @@
     int currentPage = ViewData["CurrentPage"] != null ? (int)ViewData["CurrentPage"] : 1;
     int totalPages = ViewData["TotalPages"] != null ? (int)ViewData["TotalPages"] : 1;
 
-    string keyword = ViewData["Keyword"]?.ToString() ?? "";
-    string sortBy = ViewData["SortBy"]?.ToString() ?? "";
+    string keyword = ViewData["CurrentQuery"]?.ToString() ?? "";
+    string sortBy = ViewData["CurrentSortOrder"]?.ToString() ?? "";
     string stockStatus = ViewData["StockStatus"]?.ToString() ?? "";
 
     decimal? minPrice = ViewData["MinPrice"] as decimal?;
@@ -188,12 +188,12 @@
     </div>
 
     <div class="filter-bar">
-        <form id="filterForm">
+        <form id="filterForm" method="get">
             <div class="row g-3 align-items-end">
                 <div class="col-lg-3 col-md-6">
                     <label class="form-label fw-semibold">Từ khóa</label>
                     <input type="text"
-                           name="keyword"
+                           name="query"
                            value="@keyword"
                            class="form-control soft-input"
                            placeholder="Tìm tên sản phẩm..." />
@@ -215,12 +215,12 @@
 
                 <div class="col-lg-2 col-md-6">
                     <label class="form-label fw-semibold">Sắp xếp</label>
-                    <select name="sortBy" class="form-select soft-select">
+                    <select name="sortOrder" class="form-select soft-select">
                         <option value="">Mới nhất</option>
-                        <option value="priceAsc" selected="@(sortBy == "priceAsc")">Giá tăng dần</option>
-                        <option value="priceDesc" selected="@(sortBy == "priceDesc")">Giá giảm dần</option>
-                        <option value="nameAsc" selected="@(sortBy == "nameAsc")">Tên A-Z</option>
-                        <option value="nameDesc" selected="@(sortBy == "nameDesc")">Tên Z-A</option>
+                        <option value="price_asc" selected="@(sortBy == "price_asc")">Giá tăng dần</option>
+                        <option value="price_desc" selected="@(sortBy == "price_desc")">Giá giảm dần</option>
+                        <option value="name_asc" selected="@(sortBy == "name_asc")">Tên A-Z</option>
+                        <option value="name_desc" selected="@(sortBy == "name_desc")">Tên Z-A</option>
                     </select>
                 </div>
 

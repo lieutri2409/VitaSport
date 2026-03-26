@@ -19,13 +19,12 @@ namespace Shopping.Controllers
 
         public async Task<IActionResult> ListPublic(
     int? categoryId,
-    string? keyword,
+    string? query,
+    string? sortOrder,
     decimal? minPrice,
     decimal? maxPrice,
-    string? sortBy,
     string? stockStatus,
-    int page = 1,
-    bool ajax = false)
+    int page = 1)
         {
             int pageSize = 8;
 
@@ -37,79 +36,83 @@ namespace Shopping.Controllers
                 .Include(p => p.Category)
                 .AsQueryable();
 
+            // 🔥 Filter category
             if (categoryId.HasValue && categoryId.Value > 0)
+                productsQuery = productsQuery.Where(p => p.CategoryId == categoryId);
+
+            // 🔥 Search
+            if (!string.IsNullOrWhiteSpace(query))
             {
-                productsQuery = productsQuery.Where(p => p.CategoryId == categoryId.Value);
+                var keyword = query.Trim().ToLower();
+                productsQuery = productsQuery.Where(p =>
+                    p.Name.ToLower().Contains(keyword) ||
+                    p.Description.ToLower().Contains(keyword) ||
+                    (p.Category != null && p.Category.CategoryName.ToLower().Contains(keyword)));
             }
 
-            if (!string.IsNullOrWhiteSpace(keyword))
-            {
-                productsQuery = productsQuery.Where(p => p.Name.Contains(keyword));
-            }
-
+            // 🔥 Price filter
             if (minPrice.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
-            }
+                productsQuery = productsQuery.Where(p => p.Price >= minPrice);
 
             if (maxPrice.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
-            }
+                productsQuery = productsQuery.Where(p => p.Price <= maxPrice);
 
-            if (!string.IsNullOrWhiteSpace(stockStatus))
-            {
-                if (stockStatus == "inStock")
-                {
-                    productsQuery = productsQuery.Where(p => p.Quantity > 0);
-                }
-                else if (stockStatus == "outStock")
-                {
-                    productsQuery = productsQuery.Where(p => p.Quantity <= 0);
-                }
-            }
+            // 🔥 Stock filter
+            if (stockStatus == "inStock")
+                productsQuery = productsQuery.Where(p => p.Quantity > 0);
 
-            productsQuery = sortBy switch
+            if (stockStatus == "outStock")
+                productsQuery = productsQuery.Where(p => p.Quantity == 0);
+
+            // 🔥 Sort
+            switch (sortOrder)
             {
-                "priceAsc" => productsQuery.OrderBy(p => p.Price),
-                "priceDesc" => productsQuery.OrderByDescending(p => p.Price),
-                "nameAsc" => productsQuery.OrderBy(p => p.Name),
-                "nameDesc" => productsQuery.OrderByDescending(p => p.Name),
-                _ => productsQuery.OrderByDescending(p => p.Id)
-            };
+                case "price_asc":
+                    productsQuery = productsQuery.OrderBy(p => p.Price);
+                    break;
+                case "price_desc":
+                    productsQuery = productsQuery.OrderByDescending(p => p.Price);
+                    break;
+                case "name_asc":
+                    productsQuery = productsQuery.OrderBy(p => p.Name);
+                    break;
+                case "name_desc":
+                    productsQuery = productsQuery.OrderByDescending(p => p.Name);
+                    break;
+                default:
+                    productsQuery = productsQuery.OrderByDescending(p => p.Id);
+                    break;
+            }
 
             int totalProducts = await productsQuery.CountAsync();
             int totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
 
             if (page < 1) page = 1;
-            if (totalPages > 0 && page > totalPages) page = totalPages;
+            if (page > totalPages && totalPages > 0) page = totalPages;
 
             var products = await productsQuery
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            if (categoryId.HasValue && categoryId.Value > 0)
-            {
-                var currentCategory = await _context.Categories.FindAsync(categoryId.Value);
-                if (currentCategory != null)
-                {
-                    ViewData["CurrentCategoryName"] = currentCategory.CategoryName;
-                }
-            }
-
+            // ✅ giữ state
             ViewData["CurrentCategoryId"] = categoryId;
+            ViewData["CurrentCategoryName"] = categoryId > 0
+                ? (await _context.Categories.FindAsync(categoryId))?.CategoryName
+                : null;
+
             ViewData["ProductCount"] = totalProducts;
             ViewData["CurrentPage"] = page;
             ViewData["TotalPages"] = totalPages;
 
-            ViewData["Keyword"] = keyword;
+            ViewData["CurrentQuery"] = query;
+            ViewData["CurrentSortOrder"] = sortOrder;
+            ViewData["StockStatus"] = stockStatus;
             ViewData["MinPrice"] = minPrice;
             ViewData["MaxPrice"] = maxPrice;
-            ViewData["SortBy"] = sortBy;
-            ViewData["StockStatus"] = stockStatus;
 
-            if (ajax)
+            // 🔥 AJAX
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
                 return PartialView("_ProductListPartial", products);
             }
